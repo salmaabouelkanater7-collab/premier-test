@@ -1,0 +1,36 @@
+# Copier ce fichier en config.ini et adapter les chemins à votre serveur.
+
+[constellio]
+# Nom du service systemd de Constellio
+service = constellio
+dossier_installation = /opt/constellio
+# Fichier .war actuellement utilisé par Constellio (celui qui sera remplacé)
+chemin_war = /opt/constellio/webapp/constellio.war
+# Dossier de configuration sauvegardé avant chaque mise à jour (laisser vide pour ignorer)
+dossier_conf = /opt/constellio/conf
+dossier_sauvegardes = /opt/constellio/sauvegardes
+# Journal de Constellio, analysé en cas d'erreur
+fichier_log = /opt/constellio/logs/wrapper.log
+# Journal de l'agent lui-même (laisser vide pour ne rien écrire)
+journal_agent = /var/log/constellio-agent-maj.log
+
+# Adresse testée pour savoir si Constellio a bien redémarré
+url_sante = http://localhost:8080/constellio/
+# Adresse Solr testée avant la mise à jour (laisser vide pour ignorer)
+url_solr = http://localhost:8983/solr/
+
+espace_disque_min_go = 5
+delai_arret_s = 180
+delai_demarrage_s = 900
+# Revenir automatiquement à la version précédente si la mise à jour échoue
+restauration_auto = oui
+
+[ia]
+# Analyse des erreurs inconnues par Claude (nécessite : pip install anthropic, Python 3.10+,
+# et la variable d'environnement ANTHROPIC_API_KEY)
+activee = oui
+modele = claude-opus-5-5
+# oui = demander l'avis de l'IA même quand l'erreur est connue
+toujours = non
+# Nombre de lignes du journal envoyées à l'IA (mots de passe masqués automatiquement)
+lignes_log_max = 300
