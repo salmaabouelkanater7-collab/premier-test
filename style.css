@@ -1,0 +1,200 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --couleur-principale: #6c5ce7;
+    --couleur-fond: #f7f7fb;
+    --couleur-texte: #2d3436;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--couleur-fond);
+    color: var(--couleur-texte);
+    line-height: 1.6;
+}
+
+/* En-tête */
+.header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--couleur-principale);
+    text-decoration: none;
+}
+
+.nav a {
+    margin-left: 1.5rem;
+    color: var(--couleur-texte);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav a:hover {
+    color: var(--couleur-principale);
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 1.6rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Bannière */
+.hero {
+    text-align: center;
+    padding: 6rem 1rem;
+    background: linear-gradient(135deg, var(--couleur-principale), #a29bfe);
+    color: #fff;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* Sections */
+.section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 4rem 1rem;
+}
+
+.section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--couleur-principale);
+}
+
+/* Cartes */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    margin-bottom: 0.5rem;
+}
+
+/* Bouton */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.8rem;
+    background: #fff;
+    color: var(--couleur-principale);
+    border: 2px solid var(--couleur-principale);
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn:hover {
+    background: var(--couleur-principale);
+    color: #fff;
+}
+
+/* Formulaire */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 500px;
+}
+
+.form input,
+.form textarea {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.form .btn {
+    align-self: flex-start;
+}
+
+.form-message {
+    color: green;
+    font-weight: bold;
+}
+
+/* Pied de page */
+.footer {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--couleur-texte);
+    color: #fff;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav.ouvert {
+        display: flex;
+    }
+
+    .nav a {
+        margin: 0;
+        padding: 1rem 2rem;
+        border-top: 1px solid #eee;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+}
