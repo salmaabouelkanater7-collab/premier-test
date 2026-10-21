@@ -1,0 +1,166 @@
+[
+  {
+    "titre": "Droits insuffisants",
+    "motifs": ["Permission denied", "Operation not permitted", "AccessDeniedException"],
+    "cause": "L'agent ou Constellio n'a pas les droits sur un fichier ou dossier.",
+    "solutions": [
+      "Lancer l'agent avec sudo : sudo python3 agent_maj.py --war ...",
+      "Rendre les fichiers à l'utilisateur du service : sudo chown -R constellio:constellio /opt/constellio",
+      "Vérifier l'utilisateur du service : systemctl show -p User constellio"
+    ]
+  },
+  {
+    "titre": "Espace disque insuffisant",
+    "motifs": ["No space left on device", "espace insuffisant", "Disk quota exceeded"],
+    "cause": "Le disque est plein : le .war, la sauvegarde ou les index Solr ne peuvent pas être écrits.",
+    "solutions": [
+      "Voir l'espace : df -h /opt/constellio",
+      "Trouver les gros dossiers : sudo du -sh /opt/constellio/* | sort -h",
+      "Supprimer les anciennes sauvegardes de l'agent et les vieux journaux (/opt/constellio/logs/*.log.*)",
+      "Relancer la mise à jour une fois de l'espace libéré"
+    ]
+  },
+  {
+    "titre": "Fichier .war corrompu ou incomplet",
+    "motifs": ["ZipException", "invalid LOC header", "zip file is empty", "error in opening zip file", "Checksum mismatch", "archive .war valide", "introuvable ou vide"],
+    "cause": "Le fichier de mise à jour est incomplet (téléchargement interrompu) ou n'est pas le bon fichier.",
+    "solutions": [
+      "Re-télécharger le .war depuis la source officielle",
+      "Comparer la somme : sha256sum fichier.war (avec celle fournie par Constellio)",
+      "Relancer avec --sha256 <somme> pour que l'agent vérifie automatiquement"
+    ]
+  },
+  {
+    "titre": "Mémoire Java insuffisante",
+    "motifs": ["OutOfMemoryError", "Java heap space", "GC overhead limit exceeded", "Metaspace", "Cannot allocate memory"],
+    "cause": "Constellio n'a pas assez de mémoire (la migration après mise à jour en demande souvent plus).",
+    "solutions": [
+      "Voir la mémoire du serveur : free -h",
+      "Augmenter la mémoire Java dans /opt/constellio/conf/wrapper.conf : wrapper.java.maxmemory=4096 (en Mo, selon la RAM disponible)",
+      "Arrêter les autres applications gourmandes sur le serveur",
+      "Redémarrer : sudo systemctl restart constellio"
+    ]
+  },
+  {
+    "titre": "Port déjà utilisé",
+    "motifs": ["Address already in use", "BindException", "Port .* already in use"],
+    "cause": "Un ancien processus Constellio/Tomcat tourne encore et occupe le port.",
+    "solutions": [
+      "Trouver le processus : sudo ss -ltnp | grep -E ':8080|:8443'",
+      "Arrêter proprement : sudo systemctl stop constellio",
+      "Si un processus java reste : sudo kill <PID> (puis kill -9 <PID> en dernier recours)",
+      "Redémarrer : sudo systemctl start constellio"
+    ]
+  },
+  {
+    "titre": "Solr injoignable",
+    "motifs": ["Solr injoignable", "SolrServerException", "RemoteSolrException", "localhost:8983.*(refused|failed)", "Server refused connection"],
+    "cause": "Le moteur d'indexation Solr est arrêté ou ne répond pas : Constellio ne peut pas démarrer sans lui.",
+    "solutions": [
+      "Vérifier Solr : sudo systemctl status solr",
+      "Le démarrer : sudo systemctl start solr",
+      "Tester : curl http://localhost:8983/solr/admin/cores?action=STATUS",
+      "Consulter le journal Solr : /var/solr/logs/solr.log"
+    ]
+  },
+  {
+    "titre": "Index Solr verrouillé",
+    "motifs": ["LockObtainFailedException", "Lock obtain timed out", "write\\.lock"],
+    "cause": "Un fichier de verrou est resté après un arrêt brutal de Solr.",
+    "solutions": [
+      "Arrêter Constellio et Solr : sudo systemctl stop constellio solr",
+      "Supprimer le verrou : sudo find /var/solr -name write.lock -delete",
+      "Redémarrer Solr puis Constellio"
+    ]
+  },
+  {
+    "titre": "ZooKeeper injoignable (mode cluster)",
+    "motifs": ["KeeperException", "ConnectionLossException", "zookeeper.*(refused|timed out)"],
+    "cause": "En mode cluster, Constellio/Solr ne joint pas ZooKeeper.",
+    "solutions": [
+      "Vérifier ZooKeeper : sudo systemctl status zookeeper",
+      "Tester : echo ruok | nc localhost 2181 (réponse attendue : imok)",
+      "Vérifier l'adresse ZooKeeper dans la configuration de Constellio"
+    ]
+  },
+  {
+    "titre": "Mauvaise version de Java",
+    "motifs": ["UnsupportedClassVersionError", "Unsupported major.minor version", "class file version"],
+    "cause": "La nouvelle version de Constellio exige une version de Java plus récente que celle installée.",
+    "solutions": [
+      "Voir la version : java -version",
+      "Consulter les prérequis Java de la version de Constellio installée",
+      "Installer la bonne version (ex. : sudo dnf install java-17-openjdk ou sudo apt install openjdk-17-jdk)",
+      "Indiquer le chemin de Java dans wrapper.conf : wrapper.java.command=/usr/lib/jvm/<version>/bin/java"
+    ]
+  },
+  {
+    "titre": "Java absent",
+    "motifs": ["java: command not found", "No such file or directory.*java"],
+    "cause": "Java n'est pas installé ou n'est pas dans le PATH.",
+    "solutions": [
+      "Vérifier : which java && java -version",
+      "Installer Java (version exigée par Constellio)",
+      "Ou renseigner le chemin complet dans wrapper.conf : wrapper.java.command"
+    ]
+  },
+  {
+    "titre": "Service introuvable",
+    "motifs": ["Unit .* not found", "No such file or directory.*\\.service", "could not be found"],
+    "cause": "Le nom du service dans config.ini ne correspond pas au service installé.",
+    "solutions": [
+      "Lister les services : systemctl list-units --type=service | grep -i constellio",
+      "Corriger 'service' dans config.ini"
+    ]
+  },
+  {
+    "titre": "Échec de la migration des données",
+    "motifs": ["Migration.*(failed|error|échec)", "MigrationException", "OptimisticLocking"],
+    "cause": "Au premier démarrage, la nouvelle version migre les données et une étape de migration a échoué.",
+    "solutions": [
+      "Ne pas relancer en boucle : restaurer la version précédente (fait automatiquement si restauration_auto = oui)",
+      "Récupérer le journal complet : /opt/constellio/logs/wrapper.log",
+      "Vérifier qu'aucune version intermédiaire n'a été sautée (certaines mises à jour doivent se faire par étapes)",
+      "Transmettre le journal au support Constellio"
+    ]
+  },
+  {
+    "titre": "Trop de fichiers ouverts",
+    "motifs": ["Too many open files"],
+    "cause": "La limite de fichiers ouverts du système est trop basse pour Constellio/Solr.",
+    "solutions": [
+      "Ajouter LimitNOFILE=65000 dans la section [Service] : sudo systemctl edit constellio",
+      "Recharger : sudo systemctl daemon-reload && sudo systemctl restart constellio"
+    ]
+  },
+  {
+    "titre": "Problème de certificat SSL",
+    "motifs": ["PKIX path building failed", "SSLHandshakeException", "certificate (expired|verify failed)"],
+    "cause": "Un certificat est expiré ou n'est pas reconnu par Java.",
+    "solutions": [
+      "Vérifier la date du certificat : openssl s_client -connect <hôte>:443 </dev/null | openssl x509 -noout -dates",
+      "Importer le certificat dans le truststore Java avec keytool -importcert",
+      "Renouveler le certificat s'il est expiré"
+    ]
+  },
+  {
+    "titre": "Démarrage trop long ou bloqué",
+    "motifs": ["Timeout : Constellio ne répond pas", "ne s'arrête pas"],
+    "cause": "Constellio met plus de temps que prévu (grosse migration) ou il est bloqué.",
+    "solutions": [
+      "Suivre le journal en direct : sudo tail -f /opt/constellio/logs/wrapper.log",
+      "Si le journal avance encore (migration), augmenter delai_demarrage_s dans config.ini",
+      "Si rien ne bouge, regarder les dernières erreurs du journal et l'état : systemctl status constellio"
+    ]
+  },
+  {
+    "titre": "Base de données injoignable",
+    "motifs": ["Communications link failure", "Connection to .* refused", "PSQLException", "SQLException"],
+    "cause": "Une base de données utilisée par Constellio ne répond pas ou les identifiants sont refusés.",
+    "solutions": [
+      "Vérifier que le service de base de données tourne (systemctl status postgresql / mysql)",
+      "Vérifier hôte, port et identifiants dans la configuration de Constellio",
+      "Tester la connexion depuis le serveur Constellio"
+    ]
+  }
+]
